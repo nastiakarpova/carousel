@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
+
+    <title>Carousel</title>
+
+    <style>
+        body {
+            font-family: "Inter";
+            box-sizing: border-box;
+            color: rgb(40, 40, 40);
+        }
+        #wrapper{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+        #wrapper-box {
+            display: flex;
+            margin: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .box {
+            height: 100px;
+            width: 100px;
+            transform: scale(1, 1);
+            order: 1;
+        }
+
+        #box-1 {
+            background-color: rgb(237, 166, 202);
+        }
+
+        #box-2 {
+            background-color: blanchedalmond;
+        }
+
+        #box-3 {
+            background-color: rgb(246, 215, 220)
+        }
+
+        #box-4 {
+            background-color: rgb(227, 172, 225);
+        }
+
+        #box-5 {
+            background-color: rgb(255, 195, 173);
+        }
+
+        .first {
+            order: 0;
+        }
+
+        .last {
+            order: 2;
+            z-index: -1;
+        }
+
+
+        .middle {
+            transform: scale(1.1, 1.1);
+            transition: transform 1s ease-in-out; 
+        }
+
+
+        .div-btn {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+        }
+
+        .btn {
+            background-color: white;
+            border: 1px solid rgb(187, 187, 187);
+            width: 70px;
+            height: 26px;
+            border-radius: 12px;
+            font-family: "Inter";
+            font-size: 14px;
+            color: rgb(40, 40, 40);
+        }
+    </style>
+
+
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.29.0/ramda.min.js"></script>
+    <div id="wrapper">
+        <div id="wrapper-box">
+            <div class="box" id="box-1">1</div>
+            <div class="box" id="box-2">2</div>
+            <div class="box" id="box-3">3</div>
+            <div class="box" id="box-4">4</div>
+            <div class="box" id="box-5">5</div>
+        </div>
+        <div class="div-btn">
+            <button onclick="moveLeft()" class="btn btn-left"> < </button>
+            <button onclick="moveRight()" class="btn btn-right"> > </button>
+        </div>
+
+    </div>
+
+    <script>
+
+        function moveLeft() {
+            console.log ("move left");
+
+        }
+
+        function moveRight() {
+            console.log("move right");
+        }
+
+    </script>
+    
+</body>
+</html>
