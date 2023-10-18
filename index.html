@@ -26,11 +26,14 @@
             flex-wrap: wrap;
             gap: -8px;
         }
-        .box {
+        .parent-box {
+            transition: transform 300ms;
+            /* no transform */
+        }
+
+        .child-box {
             height: 100px;
             width: 100px;
-            transform: scale(1, 1);
-            order: 1;
             border: 1px solid rgb(133, 29, 72);
             background-color: rgb(230, 206, 216);
             display: flex;
@@ -38,23 +41,12 @@
             align-items: center;
             font-size: large;
             transition: transform 300ms;
-            /* no transform */
-
         }
 
         .middle-box {
-            /* background-color: rgb(237, 166, 202); */
-            z-index: 1;
             transform: scale(1.2, 1.2);
-            transition: transform 300ms;
             /* no transition */
-            /* animation: scale 300ms; */
         }
-
-        /* @keyframes scale {
-            0%   {transform:scale(1);}
-            100% {transform:scale(1.1);}
-        }  */
    
         .div-btn {
             display: flex;
@@ -81,9 +73,15 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.29.0/ramda.min.js"></script>
         <div id="wrapper">
             <div id="wrapper-box">
-                <div class="box">1</div>
-                <div class="box middle-box">2</div>
-                <div class="box">3</div>
+                <div class="parent-box">
+                    <div class="child-box">1</div>
+                </div>
+                <div class="parent-box">
+                    <div class="child-box middle-box">2</div>
+                </div>
+                <div class="parent-box">
+                    <div class="child-box">3</div>
+                </div>
             </div>
             <div class="div-btn">
                 <button onclick="shiftLeft()" class="btn btn-left"> < </button>
@@ -153,8 +151,11 @@
 
             function calculateZIndex(direction) {
                 let zIndex = []
-                zIndex = direction === "right" ? [1, 2, 0] : [0, 2, 1];
-                // TODO: add mirroring of array, so it works with more boxes
+                zIndex = direction === "right" ? [0, 2, 0] : [0, 2, 0];
+                // zIndex = direction === "right" ? [1, 2, 0] : [0, 2, 1];
+
+                console.log(zIndex)
+                // TODO: add mirroring of array, so it works with more boxes. Add error handling
                 return zIndex;
             }
 
@@ -165,39 +166,45 @@
                 mapIndexed = R.addIndex(R.map);
 
                 let displayedBoxes = mapIndexed(
-                    (x, idx) => `<div class="box ${idx === idxMiddle ? "middle-box" : ""}" style="z-index: ${zIndex[idx]};">${x}</div>`
+                    (x, idx) => `<div class="parent-box"><div class="child-box ${idx === idxMiddle ? "middle-box" : ""}" style="z-index: ${zIndex[idx]};">${x}</div></div>`
                 )(boxes);
                 
                 document.querySelector("#wrapper-box").innerHTML = `
                 ${R.join("", displayedBoxes)}`;
 
+                let parentBox = document.getElementsByClassName("parent-box");
+                let childBox = document.getElementsByClassName("child-box");
+
+                console.log(parentBox);
+                console.log(childBox);
+
                 for (let idx = 0; idx < R.length(boxes); idx++) {
-            
-                    if (idx === idxMiddle) {
-                        children[idx].animate([{
-                        transformOrigin: 'top left',
-                        transform: `
-                            translate(${deltaX[idx]}px, 0px)
-                            
-                        `
-                        }, {
-                        transformOrigin: 'center',
-                        transform: 'translate(0px, 0px) '
-                        }], {
-                        duration: 500
-                    
-                        })
-                    } else {
-                        children[idx].animate([{
+
+                        parentBox[idx].animate([{
                             transformOrigin: 'top left',
                             transform: `translate(${deltaX[idx]}px, 0px)`
-                            }, {
+                        }, {
                             transformOrigin: 'top left',
                             transform: 'translate(0px, 0px)'
-                            }], {
-                            duration: 500
+                        }], {
+                            duration: 400
                         })
-                    };
+                }
+                
+                for (let idx = 0; idx < R.length(boxes); idx++) {
+            
+                        childBox[idx].animate([{
+                            transformOrigin: 'center',
+                            transform: 'scale(1, 1)'
+                        }, {
+                            transformOrigin: 'center',
+                            transform: `${idx === idxMiddle ? "scale(1.2, 1.2)" : "scale(1.01, 1.01)"}`
+                        }, {
+                            transformOrigin: 'center',
+                            transform: `${idx === idxMiddle ? "scale(1.2, 1.2)" : "scale(1, 1)"}`
+                        }], {
+                            duration: 200
+                        })
                 }
             }
 
