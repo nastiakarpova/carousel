@@ -94,7 +94,6 @@
         <script>
 
             let boxes = ["1", "2", "3"];
-            const idxMiddle = R.length(boxes) % 2;
 
             function shiftLeft() {
                 // needs to be 5 1 2 3 4 
@@ -154,27 +153,20 @@
 
             function calculateZIndex(direction) {
                 let zIndex = []
-                if (direction === "right") {
-                    zIndex = [1, 2 ,0];
-                } else if (direction === "left") {
-                    zIndex = [0, 2, 1];
-                }
-                // TODO: ternary operator
+                zIndex = direction === "right" ? [1, 2, 0] : [0, 2, 1];
+                // TODO: add mirroring of array, so it works with more boxes
                 return zIndex;
             }
 
 
             function render(boxes, deltaX, zIndex) {
 
-                const middleBoxValue = boxes[idxMiddle];
-
+                const idxMiddle = R.length(boxes) % 2;
                 mapIndexed = R.addIndex(R.map);
-                let displayedBoxes = mapIndexed((x, idx) => `<div class="box" style="z-index: ${zIndex[idx]};">${x}</div>`
+
+                let displayedBoxes = mapIndexed(
+                    (x, idx) => `<div class="box ${idx === idxMiddle ? "middle-box" : ""}" style="z-index: ${zIndex[idx]};">${x}</div>`
                 )(boxes);
-
-                //TODO: add ternary with idxMiddle
-
-                displayedBoxes[idxMiddle] = `<div class="box middle-box" style="z-index: ${zIndex[idxMiddle]};">${middleBoxValue}</div>`;
                 
                 document.querySelector("#wrapper-box").innerHTML = `
                 ${R.join("", displayedBoxes)}`;
