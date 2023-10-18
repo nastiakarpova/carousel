@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,51 +24,38 @@
             display: flex;
             margin: 12px;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: -8px;
         }
         .box {
             height: 100px;
             width: 100px;
             transform: scale(1, 1);
             order: 1;
+            border: 1px solid rgb(133, 29, 72);
+            background-color: rgb(230, 206, 216);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: large;
+            transition: transform 300ms;
+            /* no transform */
+
         }
 
-        #box-1 {
-            background-color: rgb(237, 166, 202);
+        .middle-box {
+            /* background-color: rgb(237, 166, 202); */
+            z-index: 1;
+            transform: scale(1.2, 1.2);
+            transition: transform 300ms;
+            /* no transition */
+            /* animation: scale 300ms; */
         }
 
-        #box-2 {
-            background-color: blanchedalmond;
-        }
-
-        #box-3 {
-            background-color: rgb(246, 215, 220)
-        }
-
-        #box-4 {
-            background-color: rgb(227, 172, 225);
-        }
-
-        #box-5 {
-            background-color: rgb(255, 195, 173);
-        }
-
-        .first {
-            order: 0;
-        }
-
-        .last {
-            order: 2;
-            z-index: -1;
-        }
-
-
-        .middle {
-            transform: scale(1.1, 1.1);
-            transition: transform 1s ease-in-out; 
-        }
-
-
+        /* @keyframes scale {
+            0%   {transform:scale(1);}
+            100% {transform:scale(1.1);}
+        }  */
+   
         .div-btn {
             display: flex;
             flex-direction: row;
@@ -82,41 +70,146 @@
             border-radius: 12px;
             font-family: "Inter";
             font-size: 14px;
+            font-weight: 600;
             color: rgb(40, 40, 40);
         }
     </style>
 
 
 </head>
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.29.0/ramda.min.js"></script>
-    <div id="wrapper">
-        <div id="wrapper-box">
-            <div class="box" id="box-1">1</div>
-            <div class="box" id="box-2">2</div>
-            <div class="box" id="box-3">3</div>
-            <div class="box" id="box-4">4</div>
-            <div class="box" id="box-5">5</div>
+    <body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.29.0/ramda.min.js"></script>
+        <div id="wrapper">
+            <div id="wrapper-box">
+                <div class="box">1</div>
+                <div class="box middle-box">2</div>
+                <div class="box">3</div>
+            </div>
+            <div class="div-btn">
+                <button onclick="shiftLeft()" class="btn btn-left"> < </button>
+                <button onclick="shiftRight()" class="btn btn-right"> > </button>
+            </div>
         </div>
-        <div class="div-btn">
-            <button onclick="moveLeft()" class="btn btn-left"> < </button>
-            <button onclick="moveRight()" class="btn btn-right"> > </button>
-        </div>
 
-    </div>
+        <script>
 
-    <script>
+            let boxes = ["1", "2", "3"];
+            const idxMiddle = R.length(boxes) % 2;
 
-        function moveLeft() {
-            console.log ("move left");
+            function shiftLeft() {
+                // needs to be 5 1 2 3 4 
+                boxes = R.concat(
+                            R.slice(-1, Infinity, boxes), 
+                            R.slice(0, R.length(boxes) - 1, boxes)
+                    );
+                    //TODO: add spread operator instead
 
-        }
+                let deltaX = calculateDeltaX("left");
+                let zIndex = calculateZIndex("left");
 
-        function moveRight() {
-            console.log("move right");
-        }
+                render(boxes, deltaX, zIndex);
+            }
 
-    </script>
+            function shiftRight() {
+                // needs to be 2 3 4 5 1
+                boxes = R.concat(
+                            R.tail(boxes), 
+                            R.slice(0, 1, boxes)
+                    );
+
+                let deltaX = calculateDeltaX("right");
+                let zIndex = calculateZIndex("right");
+                render(boxes, deltaX, zIndex);
+            }
+
+            function calculateDeltaX(direction) {
+
+                children = document.querySelector("#wrapper-box").children;
+                let boxesPositions = R.map(box => box.getBoundingClientRect(), children);
+
+                let deltaX = [];
+                for (let idx = 0; idx < R.length(boxes); idx++) {
+                    let x;
+                    idxAhead = idx + 1;
+                    
+                    if (idx === R.length(boxes) - 1) {
+                        x = boxesPositions[0].x - boxesPositions[R.length(boxes) - 1].x;
+                        deltaX.push(x);
+                    } else {
+                        x = boxesPositions[idxAhead].x - boxesPositions[idx].x;
+                        deltaX.push(x);
+                    }
+                }
+
+                if (direction === "left") {
+                    deltaX = R.concat(
+                        R.slice(-1, Infinity, deltaX),
+                        R.slice(0, R.length(boxes) - 1, deltaX)
+                    );
+                    deltaX = R.map(x => -x, deltaX);
+                }
+
+                return deltaX;
+            }
+
+            function calculateZIndex(direction) {
+                let zIndex = []
+                if (direction === "right") {
+                    zIndex = [1, 2 ,0];
+                } else if (direction === "left") {
+                    zIndex = [0, 2, 1];
+                }
+                // TODO: ternary operator
+                return zIndex;
+            }
+
+
+            function render(boxes, deltaX, zIndex) {
+
+                const middleBoxValue = boxes[idxMiddle];
+
+                mapIndexed = R.addIndex(R.map);
+                let displayedBoxes = mapIndexed((x, idx) => `<div class="box" style="z-index: ${zIndex[idx]};">${x}</div>`
+                )(boxes);
+
+                //TODO: add ternary with idxMiddle
+
+                displayedBoxes[idxMiddle] = `<div class="box middle-box" style="z-index: ${zIndex[idxMiddle]};">${middleBoxValue}</div>`;
+                
+                document.querySelector("#wrapper-box").innerHTML = `
+                ${R.join("", displayedBoxes)}`;
+
+                for (let idx = 0; idx < R.length(boxes); idx++) {
+            
+                    if (idx === idxMiddle) {
+                        children[idx].animate([{
+                        transformOrigin: 'top left',
+                        transform: `
+                            translate(${deltaX[idx]}px, 0px)
+                            
+                        `
+                        }, {
+                        transformOrigin: 'center',
+                        transform: 'translate(0px, 0px) '
+                        }], {
+                        duration: 500
+                    
+                        })
+                    } else {
+                        children[idx].animate([{
+                            transformOrigin: 'top left',
+                            transform: `translate(${deltaX[idx]}px, 0px)`
+                            }, {
+                            transformOrigin: 'top left',
+                            transform: 'translate(0px, 0px)'
+                            }], {
+                            duration: 500
+                        })
+                    };
+                }
+            }
+
+        </script>
     
-</body>
+    </body>
 </html>
